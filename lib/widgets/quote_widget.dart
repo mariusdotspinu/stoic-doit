@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/quote_utils.dart';
@@ -18,7 +17,7 @@ class QuoteWidget extends StatelessWidget {
   Container quoteContainer(BuildContext context, Future<Quote> quote) {
     return Container(
         child: Center(child: quoteFutureBuilder(quote)),
-      margin: const EdgeInsets.all(10)
+      margin: const EdgeInsets.fromLTRB(10, 25, 10, 50)
     );
   }
 
@@ -45,11 +44,15 @@ class QuoteWidget extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               text: "\"" + quote.quote + "\"",
-              style: TextStyle(fontStyle: FontStyle.italic),
+              style: TextStyle(fontWeight: FontWeight.bold,
+                  fontFamily: 'Quote',
+                  color: Colors.grey,
+                  fontSize: 23),
               children: <TextSpan>[
                 TextSpan(
                     text: '\n\n - ' + quote.author,
-                    style: TextStyle(fontWeight: FontWeight.bold)),
+                    style: TextStyle(fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold)),
               ],
             ),
           ),
