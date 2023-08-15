@@ -1,5 +1,5 @@
 class TodoModel {
-  bool? checked = false;
+  bool checked = false;
   bool? isEnabled = true;
   bool isAutoFocus = true;
   bool checkBoxVisibility = false;

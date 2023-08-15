@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:ad_como/utils/common_utils.dart';
 import 'package:ad_como/widgets/todo/todo_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class SharedPreferencesUtils {
   static const THEME_PREF = "themePref";
+  static const TODO_KEY = "_todo_id_";
+  static const LAST_SAVED_KEY = "last_saved_todo";
   static late SharedPreferences prefs;
 
   static setDarkTheme(bool value) {
@@ -16,13 +19,27 @@ class SharedPreferencesUtils {
     return prefs.getBool(THEME_PREF) ?? false;
   }
 
+  static bool isAtLeastOneChecked() {
+    for(String key in prefs.getKeys()) {
+      if(key.startsWith(TODO_KEY)) {
+        final todoModel = jsonDecode(prefs.get(key).toString());
+        if(todoModel['checked'] == true) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   static List<TodoModel> getAllTodos() {
     List<TodoModel> todoModels = [];
     for(String key in prefs.getKeys()) {
-      if(key.startsWith('_todo_id_')) {
+      if(key.startsWith(TODO_KEY)) {
         todoModels.add(getTodo(key));
       }
     }
+    CommonUtils.sortByAddingOrder(todoModels);
+    CommonUtils.sortByCheckedItemModel(todoModels);
     return todoModels;
   }
 
@@ -49,13 +66,27 @@ class SharedPreferencesUtils {
   }
 
   static String? getLastSavedId() {
-    return prefs.getString('last_saved_todo');
+    return prefs.getString(LAST_SAVED_KEY);
   }
 
-  static removeAll(){
+  static removeAll() {
     for(String key in prefs.getKeys()) {
       if(!key.startsWith(THEME_PREF)) {
         prefs.remove(key);
+      }
+    }
+  }
+
+  static removeFinished() {
+    for(String key in prefs.getKeys()) {
+      if(key.startsWith(TODO_KEY)) {
+        final todoModel = jsonDecode(prefs.get(key).toString());
+        if(todoModel['checked'] == true) {
+          prefs.remove(key);
+        }
+        if(todoModel['id'] == getLastSavedId()) {
+          prefs.remove(LAST_SAVED_KEY);
+        }
       }
     }
   }

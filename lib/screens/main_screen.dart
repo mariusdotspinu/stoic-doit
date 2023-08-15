@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:ad_como/shared_preferences/preferences.dart';
 import 'package:ad_como/utils/animation_utils.dart';
+import 'package:ad_como/utils/common_utils.dart';
 import 'package:ad_como/widgets/dialogs/about_dialog_widget.dart';
 import 'package:ad_como/widgets/bottom-app-bar/add_item.dart';
 import 'package:ad_como/widgets/bottom-app-bar/clear_all_item.dart';
@@ -39,11 +42,11 @@ class MainState extends State<StatefulWidget> {
   MainState({required Future<Quote> quote}) {
     this.quote = quote;
     for (TodoModel todoModel in SharedPreferencesUtils.getAllTodos()) {
-      todoItems.add(
-          TodoWidget(todoModel: todoModel, function: () => changeVisibility()));
+      todoItems.add(TodoWidget(
+          todoModel: todoModel,
+          changeVisibility: () => changeVisibility(),
+          changeChecked: (id) => changeChecked(id)));
     }
-    todoItems
-        .sort((a, b) => a.todoModel.timestamp.compareTo(b.todoModel.timestamp));
   }
 
   @override
@@ -53,62 +56,85 @@ class MainState extends State<StatefulWidget> {
         appBar: buildAppBar(),
         body: Container(
             padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Column(children: [
-              QuoteWidget(quote: quote).build(context),
-              Expanded(
-                  child: Stack(
-                children: [
-                  todoItems.length > 0
-                      ? ListView.builder(
-                          physics: ClampingScrollPhysics(),
-                          controller: listViewController,
-                          itemCount: todoItems.length,
-                          itemBuilder: (context, index) {
-                            var currentItem = todoItems[index];
-                            return buildDismissibleWidget(currentItem, index);
-                          })
-                      : Container(
-                          alignment: Alignment.center,
-                          // margin: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                          child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Overthinking again...?",
-                                  style: TextStyle(
-                                      fontFamily: 'Quote',
-                                      color: Colors.blueGrey,
-                                      fontSize: 20),
-                                ),
-                                Lottie.asset('assets/yoda_math.json'),
-                              ])),
-                  Center(
-                      // margin: EdgeInsets.fromLTRB(50, 0, 50, 0),
-                      child:
-                            Visibility(
-                                visible: animationVisible,
-                                child: AnimatedTextKit(
-                                  totalRepeatCount: 1,
-                                  onFinished: () => {changeVisibility()},
-                                  animatedTexts: [
-                                    ScaleAnimatedText(AnimationUtils.fetchRandomRewardString(),
-                                        textStyle: TextStyle(fontSize: 50,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.blueGrey,
-                                            fontFamily: 'Quote'),
-                                        duration: new Duration(seconds: 1, milliseconds: 300)),
-                                  ],
-                                ))
-                          )
-                ],
-              ))
-            ])),
+            child:
+            Stack(children: [
+              Column(children: [
+                QuoteWidget(quote: quote).build(context),
+                Expanded(
+                    child: Stack(
+                      children: [
+                        todoItems.length > 0
+                            ? Scrollbar(
+                            controller: listViewController,
+                            child: ListView.builder(
+                                physics: ClampingScrollPhysics(),
+                                controller: listViewController,
+                                itemCount: todoItems.length,
+                                itemBuilder: (context, index) {
+                                  var currentItem = todoItems[index];
+                                  return buildDismissibleWidget(
+                                      currentItem, index);
+                                }))
+                            : Container(
+                            alignment: Alignment.center,
+                            // margin: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                            child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Overthinking again...?",
+                                    style: TextStyle(
+                                        fontFamily: 'Placeholder',
+                                        color: Colors.blueGrey,
+                                        fontSize: 20),
+                                  ),
+                                  Lottie.asset('assets/yoda_math.json'),
+                                ])),
+                      ],
+                    ))
+              ]),
+              Center(
+                // margin: EdgeInsets.fromLTRB(50, 0, 50, 0),
+                  child: Visibility(
+                      visible: animationVisible,
+                      child: AnimatedTextKit(
+                        totalRepeatCount: 1,
+                        onFinished: () => {changeVisibility()},
+                        animatedTexts: [
+                          ScaleAnimatedText(
+                              AnimationUtils.fetchRandomRewardString(),
+                              textStyle: TextStyle(
+                                  fontSize: 50,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.lightBlueAccent,
+                                  fontFamily: 'Quote'),
+                              duration: new Duration(
+                                  seconds: 1, milliseconds: 300)),
+                        ],
+                      )))
+            ],)
+            ),
         bottomNavigationBar: buildBottomAppBarWithItems(context));
   }
 
   void changeVisibility() {
     setState(() {
       animationVisible = !animationVisible;
+    });
+  }
+
+  void changeChecked(String id) {
+    setState(() {
+      final todoItem = todoItems
+          .firstWhere((element) => element.todoModel.id == id)
+          .todoModel;
+      todoItem.checked = !todoItem.checked;
+    });
+  }
+
+  void sortByChecked() {
+    setState(() {
+      CommonUtils.sortByCheckedItems(todoItems);
     });
   }
 
@@ -165,18 +191,26 @@ class MainState extends State<StatefulWidget> {
     });
   }
 
+  void clearFinishedItems() {
+    setState(() {
+      todoItems.removeWhere((element) => element.todoModel.checked == true);
+      SharedPreferencesUtils.removeFinished();
+    });
+  }
+
   void clearAll() {
     setState(() {
       todoItems = [];
       SharedPreferencesUtils.removeAll();
-      listViewController = ScrollController();
     });
   }
 
   void saveNewTodo() {
     TodoModel todoModel = TodoModel();
-    todoItems.add(
-        TodoWidget(todoModel: todoModel, function: () => changeVisibility()));
+    todoItems.add(TodoWidget(
+        todoModel: todoModel,
+        changeVisibility: () => changeVisibility(),
+        changeChecked: (id) => changeChecked(id)));
     SharedPreferencesUtils.saveTodo(todoModel);
     SharedPreferencesUtils.saveLastId(todoModel.id);
   }

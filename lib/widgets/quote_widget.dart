@@ -46,12 +46,12 @@ class QuoteWidget extends StatelessWidget {
               text: "\"" + quote.quote + "\"",
               style: TextStyle(fontWeight: FontWeight.bold,
                   fontFamily: 'Quote',
-                  color: Colors.grey,
-                  fontSize: 23),
+                  color: Colors.white,
+                  fontSize: 20),
               children: <TextSpan>[
                 TextSpan(
                     text: '\n\n - ' + quote.author,
-                    style: TextStyle(fontStyle: FontStyle.italic,
+                    style: TextStyle(fontStyle: FontStyle.normal,
                         fontWeight: FontWeight.bold)),
               ],
             ),

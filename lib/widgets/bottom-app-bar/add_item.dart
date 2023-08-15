@@ -18,6 +18,9 @@ class AddItem extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: () => mainState.addItem(),
+            onLongPress: () => {
+              mainState.sortByChecked()
+            },
             child: Column(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.end,

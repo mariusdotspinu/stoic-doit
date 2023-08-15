@@ -5,29 +5,36 @@ import '../../shared_preferences/preferences.dart';
 
 class TodoWidget extends StatefulWidget {
   late TodoModel todoModel;
-  late Function function;
+  late Function changeVisibility;
+  late Function changeChecked;
 
-  TodoWidget({required TodoModel todoModel, required Function function}) {
+  TodoWidget({required TodoModel todoModel, required Function changeVisibility,
+  required Function(String) changeChecked}) {
     this.todoModel = todoModel;
-    this.function = function;
+    this.changeVisibility = changeVisibility;
+    this.changeChecked = changeChecked;
   }
 
   @override
   State<StatefulWidget> createState() {
     return TodoWidgetState(
         todoModel: SharedPreferencesUtils.getTodo(todoModel.id),
-    function: function);
+        changeVisibility: changeVisibility,
+    changeChecked: (id) => changeChecked(id));
   }
 }
 
 class TodoWidgetState extends State<StatefulWidget> {
   late TodoModel todoModel;
-  late Function function;
+  late Function changeVisibility;
+  late Function(String) changeChecked;
   final controller = TextEditingController();
 
-  TodoWidgetState({required TodoModel todoModel, required Function function}) {
+  TodoWidgetState({required TodoModel todoModel, required Function changeVisibility,
+  required Function(String) changeChecked}) {
     this.todoModel = todoModel;
-    this.function = function;
+    this.changeVisibility = changeVisibility;
+    this.changeChecked = changeChecked;
     controller.text = todoModel.text;
     controller.value = controller.value.copyWith(
       text: controller.text
@@ -42,8 +49,9 @@ class TodoWidgetState extends State<StatefulWidget> {
         setState(() {
           todoModel.checked = !todoModel.checked!;
           SharedPreferencesUtils.saveTodo(todoModel);
+          changeChecked.call(todoModel.id);
           if(todoModel.checked == true)
-            function.call();
+            changeVisibility.call();
         });
       },
       shape: RoundedRectangleBorder(

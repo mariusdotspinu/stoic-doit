@@ -15,7 +15,7 @@ class AboutDialogWidget extends StatelessWidget {
                 alignment: Alignment.topLeft,
                 child: const Text("© Marius Spînu\n",
                   textAlign: TextAlign.start,
-                  style: TextStyle(fontFamily: 'Quote', fontSize: 20),)),
+                  style: TextStyle(fontFamily: 'Placeholder', fontSize: 20),)),
             Align(
                 alignment: Alignment.topLeft,
                 child: Linkify(
@@ -27,7 +27,7 @@ class AboutDialogWidget extends StatelessWidget {
                       throw 'Could not launch $link';
                     }
                   },
-                  text: "Developer's homepage: https://sikbyte.com", style: TextStyle(fontFamily: 'Quote', fontSize: 20),))
+                  text: "Developer's homepage: https://sikbyte.com", style: TextStyle(fontFamily: 'Placeholder', fontSize: 20),))
           ],
         ),
       ),

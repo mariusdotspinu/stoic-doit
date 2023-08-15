@@ -6,8 +6,9 @@ class AnimationUtils {
     "Keep it up",
     "Let's gooo",
     "Yeah, why not",
-    "Alright",
-    "On a streak.."
+    "All right",
+    "On a streak...",
+    "This was easy"
   ];
   static String fetchRandomRewardString() {
     return REWARD_STRING[Random().nextInt(REWARD_STRING.length)];
